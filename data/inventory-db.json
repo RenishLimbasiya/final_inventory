@@ -41,7 +41,7 @@
       "category": "electronics",
       "price": 1200,
       "costPrice": 12,
-      "quantity": 3,
+      "quantity": 4,
       "minStockLevel": 1,
       "maxStockLevel": 20,
       "unit": "liters",
@@ -49,7 +49,7 @@
       "isActive": true,
       "id": "prod_8",
       "createdAt": "2026-04-09T07:25:00.142Z",
-      "updatedAt": "2026-04-09T07:25:19.821Z"
+      "updatedAt": "2026-04-09T10:08:27.151Z"
     },
     {
       "sku": "SKU-004",
@@ -144,10 +144,19 @@
       "newQuantity": 6,
       "note": "gggg",
       "performedAt": "2026-04-09T08:18:05.203Z"
+    },
+    {
+      "id": "mov_14",
+      "productId": "prod_8",
+      "type": "restock",
+      "quantity": 1,
+      "previousQuantity": 3,
+      "newQuantity": 4,
+      "performedAt": "2026-04-09T10:08:27.151Z"
     }
   ],
   "counters": {
     "productId": 10,
-    "movementId": 14
+    "movementId": 15
   }
 }

@@ -5,7 +5,8 @@ import { TopValueChart } from "@/components/TopValueChart";
 import { LowStockAlert } from "@/components/LowStockAlert";
 import { PaginatedMovementList } from "@/components/PaginatedMovementList";
 import { cn } from "@/lib/utils";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -16,6 +17,11 @@ export const revalidate = 0;
  * Server-side rendering for optimal performance
  */
 export default async function DashboardPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("inventory_token");
+
+  redirect(token ? "/products" : "/login");
+
   let products: Product[] = [];
   let movements: StockMovement[] = [];
   let stats: InventoryStats | null = null;

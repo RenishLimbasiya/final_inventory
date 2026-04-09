@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 /**
@@ -10,7 +9,6 @@ import { cn } from "@/lib/utils";
  * In production, integrate with real authentication provider
  */
 export default function LoginPage() {
-  const router = useRouter();
   const [warehouseName, setWarehouseName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -37,14 +35,13 @@ export default function LoginPage() {
 
       // Store warehouse name in localStorage
       if (data.warehouseName) {
-        localStorage.setItem("warehouseName", data.warehouseName);
+        localStorage.setItem("warehouse_name", data.warehouseName);
       }
 
-      // Redirect to dashboard
       const redirect = new URL(window.location.href).searchParams.get(
         "redirect",
       );
-      router.push(redirect || "/");
+      window.location.assign(redirect || "/products");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to log in");
     } finally {
