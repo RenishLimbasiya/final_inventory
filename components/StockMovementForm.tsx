@@ -36,7 +36,6 @@ export function StockMovementForm({
     error,
   } = useStockMovement(productId);
 
-  
   if (!product) {
     return (
       <div className={cn("glass rounded-lg p-6", className)}>
@@ -106,7 +105,9 @@ export function StockMovementForm({
           type="number"
           min="1"
           value={quantity}
-          onChange={(e) => setQuantity(Math.max(0, parseInt(e.target.value, 10) || 0))}
+          onChange={(e) =>
+            setQuantity(Math.max(0, parseInt(e.target.value, 10) || 0))
+          }
           className="glass-input w-full px-3 py-2 rounded"
           disabled={isSubmitting}
         />
@@ -155,13 +156,15 @@ export function StockMovementForm({
       </div>
 
       {/* Risk Warnings */}
-      {!canSubmit && quantity > 0 && (movementType === "sale" || movementType === "adjustment") && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded p-3">
-          <p className="text-sm font-medium text-red-600 dark:text-red-400">
-            ⚠️ This movement would exceed available stock
-          </p>
-        </div>
-      )}
+      {!canSubmit &&
+        quantity > 0 &&
+        (movementType === "sale" || movementType === "adjustment") && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded p-3">
+            <p className="text-sm font-medium text-red-600 dark:text-red-400">
+              ⚠️ This movement would exceed available stock
+            </p>
+          </div>
+        )}
 
       {previewQuantity <= product.minStockLevel && previewQuantity > 0 && (
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded p-3">
@@ -176,16 +179,14 @@ export function StockMovementForm({
         type="submit"
         disabled={isSubmitting || !canSubmit}
         className={cn(
-          "w-full btn-glass btn-glassPrimary py-2 rounded font-medium transition-all",
+          "w-full btn-glass btn-glassPrimary py-2 rounded font-medium transition-all text-white",
           isSubmitting && "opacity-60 cursor-not-allowed",
         )}
       >
         {isSubmitting ? "Recording..." : "Record Movement"}
       </button>
 
-      {error && (
-        <p className="text-xs text-destructive text-center">{error}</p>
-      )}
+      {error && <p className="text-xs text-destructive text-center">{error}</p>}
     </form>
   );
 }
