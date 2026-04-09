@@ -1,0 +1,153 @@
+{
+  "products": [
+    {
+      "sku": "SKU-001",
+      "name": "Laptop Computer",
+      "description": "Laptop",
+      "category": "electronics",
+      "price": 10000,
+      "costPrice": 5000,
+      "quantity": 6,
+      "minStockLevel": 3,
+      "maxStockLevel": 10,
+      "unit": "pieces",
+      "supplier": "Renish",
+      "isActive": true,
+      "id": "prod_5",
+      "createdAt": "2026-04-09T06:28:50.258Z",
+      "updatedAt": "2026-04-09T08:18:05.203Z"
+    },
+    {
+      "sku": "SKU-002",
+      "name": "Laptop Computer",
+      "description": "any",
+      "category": "electronics",
+      "price": 12000,
+      "costPrice": 10000,
+      "quantity": 7,
+      "minStockLevel": 4,
+      "maxStockLevel": 7,
+      "unit": "boxes",
+      "supplier": "Renish Limbasiya",
+      "isActive": true,
+      "id": "prod_6",
+      "createdAt": "2026-04-09T06:50:43.998Z",
+      "updatedAt": "2026-04-09T06:51:47.408Z"
+    },
+    {
+      "sku": "SKU-003",
+      "name": "Laptop Computer",
+      "description": "qwqw",
+      "category": "electronics",
+      "price": 1200,
+      "costPrice": 12,
+      "quantity": 3,
+      "minStockLevel": 1,
+      "maxStockLevel": 20,
+      "unit": "liters",
+      "supplier": "Renish",
+      "isActive": true,
+      "id": "prod_8",
+      "createdAt": "2026-04-09T07:25:00.142Z",
+      "updatedAt": "2026-04-09T07:25:19.821Z"
+    },
+    {
+      "sku": "SKU-004",
+      "name": "Laptop Computer",
+      "description": "gfgfg",
+      "category": "other",
+      "price": 3456,
+      "costPrice": 4567,
+      "quantity": 45,
+      "minStockLevel": 34,
+      "maxStockLevel": 34,
+      "unit": "pieces",
+      "supplier": "ttt",
+      "isActive": true,
+      "id": "prod_9",
+      "createdAt": "2026-04-09T08:19:29.224Z",
+      "updatedAt": "2026-04-09T08:19:29.224Z"
+    }
+  ],
+  "movements": [
+    {
+      "id": "mov_4",
+      "productId": "prod_5",
+      "type": "sale",
+      "quantity": 5,
+      "previousQuantity": 5,
+      "newQuantity": 0,
+      "performedAt": "2026-04-09T06:33:48.395Z"
+    },
+    {
+      "id": "mov_5",
+      "productId": "prod_5",
+      "type": "restock",
+      "quantity": 4,
+      "previousQuantity": 0,
+      "newQuantity": 4,
+      "performedAt": "2026-04-09T06:34:12.169Z"
+    },
+    {
+      "id": "mov_6",
+      "productId": "prod_5",
+      "type": "sale",
+      "quantity": 4,
+      "previousQuantity": 4,
+      "newQuantity": 0,
+      "performedAt": "2026-04-09T06:47:40.274Z"
+    },
+    {
+      "id": "mov_7",
+      "productId": "prod_6",
+      "type": "sale",
+      "quantity": 3,
+      "previousQuantity": 5,
+      "newQuantity": 2,
+      "performedAt": "2026-04-09T06:51:15.716Z"
+    },
+    {
+      "id": "mov_8",
+      "productId": "prod_6",
+      "type": "restock",
+      "quantity": 5,
+      "previousQuantity": 2,
+      "newQuantity": 7,
+      "note": "add",
+      "performedAt": "2026-04-09T06:51:47.408Z"
+    },
+    {
+      "id": "mov_9",
+      "productId": "prod_5",
+      "type": "restock",
+      "quantity": 4,
+      "previousQuantity": 0,
+      "newQuantity": 4,
+      "note": "add",
+      "performedAt": "2026-04-09T06:52:11.393Z"
+    },
+    {
+      "id": "mov_12",
+      "productId": "prod_8",
+      "type": "restock",
+      "quantity": 2,
+      "previousQuantity": 1,
+      "newQuantity": 3,
+      "performedAt": "2026-04-09T07:25:19.821Z"
+    },
+    {
+      "id": "mov_13",
+      "productId": "prod_5",
+      "type": "restock",
+      "quantity": 2,
+      "previousQuantity": 4,
+      "newQuantity": 6,
+      "note": "gggg",
+      "performedAt": "2026-04-09T08:18:05.203Z"
+    }
+  ],
+  "counters": {
+    "productId": 10,
+    "movementId": 14
+  }
+}
