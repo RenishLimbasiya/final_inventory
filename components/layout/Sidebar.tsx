@@ -13,7 +13,7 @@ interface SidebarProps {
 const NAV_ITEMS = [
   {
     label: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: "📊",
   },
   {
@@ -58,10 +58,6 @@ export function Sidebar({ onNavClick, className }: SidebarProps) {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
-    if (href === "/") {
-      return pathname === "/";
-    }
-
     if (pathname === href) {
       return true;
     }

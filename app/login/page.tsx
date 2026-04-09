@@ -41,7 +41,7 @@ export default function LoginPage() {
       const redirect = new URL(window.location.href).searchParams.get(
         "redirect",
       );
-      window.location.assign(redirect || "/products");
+      window.location.assign(redirect || "/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to log in");
     } finally {

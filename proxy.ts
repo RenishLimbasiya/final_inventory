@@ -22,7 +22,7 @@ const requestLogs: RequestLog[] = [];
  * Protected routes that require authentication
  * Public routes are: /, /login, /api/auth/*
  */
-const PROTECTED_ROUTES = ["/products", "/alerts", "/movements"];
+const PROTECTED_ROUTES = ["/dashboard", "/products", "/alerts", "/movements"];
 
 function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
