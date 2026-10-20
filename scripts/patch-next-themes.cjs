@@ -12,7 +12,6 @@ if (version !== '0.4.6') {
 }
 
 const guard = 'if(typeof window!=="undefined")return null;';
-let changed = 0;
 for (const name of ['index.js', 'index.mjs']) {
   const filename = path.join(dist, name);
   const source = fs.readFileSync(filename, 'utf8');
@@ -25,6 +24,4 @@ for (const name of ['index.js', 'index.mjs']) {
   const temporary = filename + '.react-19.tmp';
   fs.writeFileSync(temporary, source.replace(render, guard + render));
   fs.renameSync(temporary, filename);
-  changed++;
 }
-console.log(`next-themes React 19 compatibility: ${changed ? `patched ${changed} bundles` : 'already applied'}.`);

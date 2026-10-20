@@ -4,7 +4,7 @@ import React, {
   createContext,
   useContext,
   useState,
-  useEffect,
+  useSyncExternalStore,
   ReactNode,
 } from "react";
 
@@ -53,6 +53,9 @@ const WarehouseContext = createContext<WarehouseContextType | undefined>(
 const DEFAULT_WAREHOUSE_NAME = "Main Warehouse";
 const DEFAULT_CURRENCY: CurrencyCode = "USD";
 const DEFAULT_LOW_STOCK_THRESHOLD: number | null = null;
+const subscribeToHydration = () => () => {};
+const clientSnapshot = () => true;
+const serverSnapshot = () => false;
 
 /**
  * WarehouseProvider Component
@@ -66,11 +69,13 @@ export function WarehouseProvider({ children }: { children: ReactNode }) {
   const [lowStockThresholdOverride, setLowStockThresholdOverrideState] =
     useState<number | null>(DEFAULT_LOW_STOCK_THRESHOLD);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const hydrated = useSyncExternalStore(subscribeToHydration, clientSnapshot, serverSnapshot);
 
   /**
-   * Initialize from localStorage on mount
+   * Read browser preferences once after hydration. The server and initial
+   * client render use the same defaults, then update before rendering children.
    */
-  useEffect(() => {
+  if (hydrated && isLoading) {
     try {
       const storedWarehouse = localStorage.getItem("warehouse_name");
       const storedCurrency = localStorage.getItem(
@@ -105,7 +110,7 @@ export function WarehouseProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }
 
   /**
    * Update warehouse name and persist to localStorage

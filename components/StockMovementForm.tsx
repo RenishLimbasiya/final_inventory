@@ -2,6 +2,7 @@
 
 import { useStockMovement } from "@/hooks/useStockMovement";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface StockMovementFormProps {
   productId: string;
@@ -175,16 +176,14 @@ export function StockMovementForm({
       )}
 
       {/* Submit Button */}
-      <button
+      <Button
         type="submit"
         disabled={isSubmitting || !canSubmit}
-        className={cn(
-          "w-full btn-glass btn-glassPrimary py-2 rounded font-medium transition-all",
-          isSubmitting && "opacity-60 cursor-not-allowed",
-        )}
+        aria-busy={isSubmitting}
+        className="h-11 w-full cursor-pointer bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] enabled:hover:bg-[hsl(var(--primary)/0.9)] disabled:cursor-not-allowed disabled:bg-[hsl(var(--muted))] disabled:text-[hsl(var(--muted-foreground))] disabled:opacity-100"
       >
         {isSubmitting ? "Recording..." : "Record Movement"}
-      </button>
+      </Button>
 
       {error && <p className="text-xs text-destructive text-center">{error}</p>}
     </form>

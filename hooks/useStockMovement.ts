@@ -12,7 +12,6 @@ import { fetchProducts } from "@/store/productSlice";
  * Stock Movement Form Data
  */
 export function useStockMovement(productId: string) {
-  console.log("Hello", { productId });
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -23,12 +22,10 @@ export function useStockMovement(productId: string) {
   const movementStatus = useSelector(
     (state: RootState) => state.movements.status,
   );
-  console.log("Products in state:", { products });
   const product = useMemo(
     () => products.find((p) => p.id === productId),
     [products, productId],
   );
-  console.log("Product found:", { product });
 
   const [movementType, setMovementType] =
     useState<StockMovementType>("restock");

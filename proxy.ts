@@ -41,12 +41,6 @@ function logRequest(log: RequestLog): void {
   if (requestLogs.length > 1000) {
     requestLogs.shift();
   }
-
-  if (process.env.NODE_ENV === "development") {
-    console.log(
-      `[${log.timestamp}] ${log.method} ${log.path} - IP: ${log.ip} - Auth: ${log.authenticated}`,
-    );
-  }
 }
 
 function isProtectedRoute(pathname: string): boolean {

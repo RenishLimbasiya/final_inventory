@@ -1,37 +1,99 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch } from "@/hooks/useRedux";
 import { setFilters } from "@/store/productSlice";
 
+const DEBOUNCE_MS = 350;
+const TEXT_FILTERS = ["search", "minPrice", "maxPrice"] as const;
+type TextFilter = (typeof TEXT_FILTERS)[number];
+
+function readTextFilters(query: string) {
+  const params = new URLSearchParams(query);
+  return {
+    search: params.get("search") ?? "",
+    minPrice: params.get("minPrice") ?? "",
+    maxPrice: params.get("maxPrice") ?? "",
+  };
+}
+
 export function ProductFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
+  const query = searchParams.toString();
+  const [draft, setDraft] = useState(() => ({ query, values: readTextFilters(query) }));
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pending = useRef<Partial<Record<TextFilter, string>>>({});
+
+  // Restore URL-driven values on navigation without discarding newer typing
+  // while an earlier debounced navigation is still completing.
+  if (draft.query !== query) {
+    const previous = readTextFilters(draft.query);
+    const incoming = readTextFilters(query);
+    setDraft({
+      query,
+      values: Object.fromEntries(TEXT_FILTERS.map((key) => [
+        key, draft.values[key] === previous[key] ? incoming[key] : draft.values[key],
+      ])) as typeof incoming,
+    });
+  }
+
+  useEffect(() => {
+    const cancelPending = () => {
+      if (timer.current !== null) clearTimeout(timer.current);
+      pending.current = {};
+    };
+    const restoreFromHistory = () => {
+      cancelPending();
+      const restored = new URLSearchParams(window.location.search).toString();
+      setDraft({ query: restored, values: readTextFilters(restored) });
+    };
+    window.addEventListener("popstate", restoreFromHistory);
+    return () => {
+      cancelPending();
+      window.removeEventListener("popstate", restoreFromHistory);
+    };
+  }, []);
 
   /**
    * Update URL + Redux together
    */
   const updateFilter = (key: string, value: string | boolean) => {
-    const params = new URLSearchParams(searchParams.toString());
+    if (timer.current !== null) clearTimeout(timer.current);
+    const changes: Record<string, string | boolean> = { ...pending.current, [key]: value };
+    pending.current = {};
+    const params = new URLSearchParams(window.location.search);
 
-    if (!value || value === "all") {
-      params.delete(key);
-    } else {
-      params.set(key, String(value));
+    for (const [filter, nextValue] of Object.entries(changes)) {
+      if (!nextValue || nextValue === "all") {
+        params.delete(filter);
+      } else {
+        params.set(filter, String(nextValue));
+      }
     }
 
     const queryString = params.toString();
-    router.replace(queryString ? `/products?${queryString}` : "/products");
+    router.replace(queryString ? `/products?${queryString}` : "/products", { scroll: false });
 
     dispatch(
       setFilters({
-        [key]: value,
+        ...changes,
+        minPrice: params.get("minPrice") ? Number(params.get("minPrice")) : null,
+        maxPrice: params.get("maxPrice") ? Number(params.get("maxPrice")) : null,
       }),
     );
+  };
+
+  const debounceFilter = (key: TextFilter, value: string) => {
+    setDraft((current) => ({ ...current, values: { ...current.values, [key]: value } }));
+    pending.current[key] = value;
+    if (timer.current !== null) clearTimeout(timer.current);
+    timer.current = setTimeout(() => updateFilter(key, value), DEBOUNCE_MS);
   };
 
   return (
@@ -41,8 +103,8 @@ export function ProductFilters() {
       {/* Search */}
       <Input
         placeholder="Search products..."
-        value={searchParams.get("search") ?? ""}
-        onChange={(e) => updateFilter("search", e.target.value)}
+        value={draft.values.search}
+        onChange={(e) => debounceFilter("search", e.target.value)}
       />
 
       {/* Category */}
@@ -82,15 +144,15 @@ export function ProductFilters() {
         <Input
           type="number"
           placeholder="Min Price"
-          value={searchParams.get("minPrice") ?? ""}
-          onChange={(e) => updateFilter("minPrice", e.target.value)}
+          value={draft.values.minPrice}
+          onChange={(e) => debounceFilter("minPrice", e.target.value)}
         />
 
         <Input
           type="number"
           placeholder="Max Price"
-          value={searchParams.get("maxPrice") ?? ""}
-          onChange={(e) => updateFilter("maxPrice", e.target.value)}
+          value={draft.values.maxPrice}
+          onChange={(e) => debounceFilter("maxPrice", e.target.value)}
         />
       </div>
 
@@ -105,9 +167,16 @@ export function ProductFilters() {
       </label>
 
       {/* Reset */}
-      <Button variant="outline" onClick={() => router.replace("/products")}>
-        Reset Filters
-      </Button>
+      {/* A native GET navigation clears every query parameter, including after
+          a reload, without depending on a cached client router transition. */}
+      <form action="/products" method="get" onSubmit={() => {
+        if (timer.current !== null) clearTimeout(timer.current);
+        pending.current = {};
+      }}>
+        <Button type="submit" variant="outline">
+          Reset Filters
+        </Button>
+      </form>
     </div>
   );
 }
