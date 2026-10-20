@@ -149,7 +149,7 @@ export function ProductCard({
               e.stopPropagation();
               onViewMovements(product.id);
             }}
-            className="btn-glass flex-1 text-sm py-2"
+            className="btn-glass flex-1 text-sm py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             History
           </button>
@@ -160,7 +160,7 @@ export function ProductCard({
               e.stopPropagation();
               onEdit(product);
             }}
-            className="btn-glass flex-1 text-sm py-2"
+            className="btn-glass flex-1 text-sm py-2 hover:bg-sky-500/10 hover:text-sky-600"
           >
             Edit
           </button>
