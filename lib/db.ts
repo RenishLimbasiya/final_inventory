@@ -116,16 +116,20 @@ function hydrateDatabase(data: SerializedDatabaseState): void {
   db.counters = data.counters;
 }
 
+let initialized = false;
+
 /**
- * Initialize with sample data
+ * Initialize once, preserving a deliberately emptied inventory.
  */
 export function initializeDatabase() {
+  if (initialized) return;
   if (persistenceMode === "file" && existsSync(DATA_FILE)) {
     const persisted = JSON.parse(
       readFileSync(DATA_FILE, "utf8"),
     ) as SerializedDatabaseState;
 
     hydrateDatabase(persisted);
+    initialized = true;
     return;
   }
 
@@ -139,6 +143,7 @@ export function initializeDatabase() {
     db.counters.movementId = 1;
     saveDatabase();
   }
+  initialized = true;
 }
 
 /**
@@ -250,6 +255,13 @@ export function createMovement(data: {
   quantity: number;
   note?: string;
 }): StockMovement | null {
+  if (
+    !Number.isSafeInteger(data.quantity) ||
+    data.quantity <= 0 ||
+    !["restock", "return", "sale", "adjustment"].includes(data.type)
+  ) {
+    return null;
+  }
   const product = db.products.get(data.productId);
   if (!product) return null;
 
@@ -266,7 +278,7 @@ export function createMovement(data: {
       break;
   }
   // Never allow negative stock
-  if (newQuantity < 0) {
+  if (!Number.isSafeInteger(newQuantity) || newQuantity < 0) {
     return null;
   }
   // Atomic update

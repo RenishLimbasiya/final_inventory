@@ -1,3 +1,4 @@
+import { validateProductInput } from "@/lib/validation";
 import { NextRequest, NextResponse } from "next/server";
 import { getProducts, createProduct, initializeDatabase } from "@/lib/db";
 
@@ -104,63 +105,10 @@ export async function POST(request: NextRequest) {
     initializeDatabase();
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.sku || typeof body.sku !== "string") {
+    const validationError = validateProductInput(body, false);
+    if (validationError) {
       return NextResponse.json(
-        { success: false, error: "SKU is required and must be a string" },
-        { status: 400 },
-      );
-    }
-
-    if (!body.name || typeof body.name !== "string") {
-      return NextResponse.json(
-        { success: false, error: "Name is required and must be a string" },
-        { status: 400 },
-      );
-    }
-
-    if (!body.name || typeof body.name !== "string" || body.name.trim().length < 2) {
-      return NextResponse.json(
-        { success: false, error: "Name must be at least 2 characters long" },
-        { status: 400 },
-      );
-    }
-
-    if (
-      typeof body.price !== "number" ||
-      body.price <= 0 ||
-      !Number.isInteger(body.price)
-    ) {
-      return NextResponse.json(
-        { success: false, error: "Price must be a positive integer in cents" },
-        { status: 400 },
-      );
-    }
-
-    if (
-      typeof body.costPrice !== "number" ||
-      body.costPrice <= 0 ||
-      !Number.isInteger(body.costPrice)
-    ) {
-      return NextResponse.json(
-        { success: false, error: "Cost price must be a positive integer in cents" },
-        { status: 400 },
-      );
-    }
-
-    if (typeof body.quantity !== "number" || body.quantity < 0) {
-      return NextResponse.json(
-        { success: false, error: "Quantity must be a non-negative number" },
-        { status: 400 },
-      );
-    }
-
-    if (typeof body.minStockLevel !== "number" || body.minStockLevel < 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "minStockLevel must be a non-negative number",
-        },
+        { success: false, error: validationError },
         { status: 400 },
       );
     }
@@ -183,7 +131,8 @@ export async function POST(request: NextRequest) {
       costPrice: body.costPrice,
       quantity: body.quantity,
       minStockLevel: body.minStockLevel,
-      maxStockLevel: body.maxStockLevel || body.quantity * 2,
+      maxStockLevel:
+        body.maxStockLevel ?? Math.min(body.quantity * 2, Number.MAX_SAFE_INTEGER),
       unit: body.unit || "piece",
       supplier: body.supplier || "",
       isActive: body.isActive !== false,
@@ -194,6 +143,12 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON body" },
+        { status: 400 },
+      );
+    }
     console.error("POST /api/products error:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },

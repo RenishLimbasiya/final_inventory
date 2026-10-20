@@ -79,7 +79,6 @@ export function proxy(request: NextRequest) {
 
   if (inventoryToken) {
     response.headers.set("X-Authenticated", "true");
-    response.headers.set("Authorization", `Bearer ${inventoryToken}`);
   }
 
   return response;

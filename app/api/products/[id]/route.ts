@@ -1,3 +1,4 @@
+import { validateProductInput } from "@/lib/validation";
 import { NextRequest, NextResponse } from "next/server";
 import {
   getProductById,
@@ -18,7 +19,6 @@ export async function GET(
   try {
     initializeDatabase();
     const { id } = await params;
-    console.log("Hello " + id);
     const product = getProductById(id);
 
     if (!product) {
@@ -61,24 +61,10 @@ export async function PUT(
 
     const body = await request.json();
 
-    // Validate fields that are provided
-    if (body.price !== undefined && body.price <= 0) {
+    const validationError = validateProductInput(body, true);
+    if (validationError) {
       return NextResponse.json(
-        { success: false, error: "Price must be greater than 0" },
-        { status: 400 },
-      );
-    }
-
-    if (body.quantity !== undefined && body.quantity < 0) {
-      return NextResponse.json(
-        { success: false, error: "Quantity cannot be negative" },
-        { status: 400 },
-      );
-    }
-
-    if (body.minStockLevel !== undefined && body.minStockLevel < 0) {
-      return NextResponse.json(
-        { success: false, error: "minStockLevel cannot be negative" },
+        { success: false, error: validationError },
         { status: 400 },
       );
     }
@@ -105,6 +91,12 @@ export async function PUT(
 
     return NextResponse.json({ data: updated, success: true });
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON body" },
+        { status: 400 },
+      );
+    }
     console.error("PUT /api/products/[id] error:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },

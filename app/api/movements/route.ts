@@ -50,6 +50,18 @@ export async function POST(request: NextRequest) {
   try {
     initializeDatabase();
     const body = await request.json();
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        { success: false, error: "Expected a JSON object" },
+        { status: 400 },
+      );
+    }
+    if (body.note !== undefined && typeof body.note !== "string") {
+      return NextResponse.json(
+        { success: false, error: "note must be a string" },
+        { status: 400 },
+      );
+    }
     const { productId, type, quantity, note } = body as {
       productId: string;
       type: "restock" | "sale" | "adjustment" | "return";
@@ -73,7 +85,7 @@ export async function POST(request: NextRequest) {
     if (
       typeof quantity !== "number" ||
       quantity <= 0 ||
-      !Number.isInteger(quantity)
+      !Number.isSafeInteger(quantity)
     ) {
       return NextResponse.json(
         { success: false, error: "Quantity must be a positive integer" },
@@ -106,6 +118,12 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON body" },
+        { status: 400 },
+      );
+    }
     console.error("POST /api/movements error:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },

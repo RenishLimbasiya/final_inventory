@@ -41,7 +41,12 @@ export default function LoginPage() {
       const redirect = new URL(window.location.href).searchParams.get(
         "redirect",
       );
-      window.location.assign(redirect || "/dashboard");
+      const target = new URL(redirect || "/dashboard", window.location.origin);
+      window.location.assign(
+        target.origin === window.location.origin
+          ? target.pathname + target.search + target.hash
+          : "/dashboard",
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to log in");
     } finally {
