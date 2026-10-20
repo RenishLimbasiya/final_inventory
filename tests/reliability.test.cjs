@@ -12,14 +12,17 @@ function load(relativePath) {
   const filename = require('node:path').resolve(relativePath);
   if (loaded.has(filename)) return loaded.get(filename);
   const compiled = ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
-    compilerOptions: { esModuleInterop: true, module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
+    compilerOptions: { esModuleInterop: true, module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX },
   });
   const instance = new Module(filename, module);
   instance.filename = filename;
   instance.paths = module.paths;
   const originalRequire = instance.require.bind(instance);
   instance.require = (id) => {
-    if (id.startsWith('@/')) return load(`${id.slice(2)}.ts`);
+    if (id.startsWith('@/')) {
+      const source = id.slice(2);
+      return load(fs.existsSync(`${source}.ts`) ? `${source}.ts` : `${source}.tsx`);
+    }
     if (id.startsWith('.')) {
       const candidate = path.resolve(path.dirname(filename), `${id}.ts`);
       if (fs.existsSync(candidate)) return load(candidate);
@@ -215,4 +218,39 @@ test('separately loaded database modules share saved products and initialization
   assert.deepEqual(reloaded.getProductById(product.id), product);
   reloaded.deleteProduct(product.id);
   assert.equal(original.getProductById(product.id), undefined);
+});
+
+test('theme initialization scripts are server-only in both dependency bundles', async () => {
+  const React = require('react');
+  const { renderToString } = require('react-dom/server');
+  const { pathToFileURL } = require('node:url');
+  const commonjs = require('next-themes');
+  const esm = await import(pathToFileURL(path.join(path.dirname(require.resolve('next-themes')), 'index.mjs')).href);
+  for (const { ThemeProvider } of [commonjs, esm]) {
+    const tree = React.createElement(ThemeProvider, { attribute: 'class', defaultTheme: 'system', enableSystem: true },
+      React.createElement('span', null, 'Theme content'));
+    const server = renderToString(tree);
+    assert.match(server, /<script\b/);
+    assert.match(server, /localStorage/);
+    const previous = Object.getOwnPropertyDescriptor(globalThis, 'window');
+    Object.defineProperty(globalThis, 'window', { value: {}, configurable: true });
+    try {
+      const client = renderToString(tree);
+      assert.doesNotMatch(client, /<script\b/);
+      assert.match(client, /Theme content/);
+    } finally {
+      if (previous) Object.defineProperty(globalThis, 'window', previous);
+      else delete globalThis.window;
+    }
+  }
+});
+
+test('theme toggle renders a stable placeholder before hydration', () => {
+  const React = require('react');
+  const { renderToString } = require('react-dom/server');
+  const { ThemeToggleButton } = load('components/ThemeToggleButton.tsx');
+  const html = renderToString(React.createElement(ThemeToggleButton));
+  assert.match(html, /aria-label="Toggle color theme"/);
+  assert.match(html, /disabled=""/);
+  assert.match(html, />Theme<\/span>/);
 });

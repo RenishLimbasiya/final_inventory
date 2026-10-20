@@ -21,6 +21,8 @@ npm start
 
 On Windows PowerShell with restricted script execution, use `npm.cmd`.
 
+`npm ci` automatically applies the React 19 compatibility fix for `next-themes` 0.4.6. It preserves the server's first-paint theme script and prevents client remount warnings. When upgrading `next-themes`, review `scripts/patch-next-themes.cjs` against [the upstream fix](https://github.com/pacocoursey/next-themes/pull/386).
+
 ## Production limitations
 
 This is a demo and needs further infrastructure before use with real business inventory.
