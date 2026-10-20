@@ -25,7 +25,7 @@ On Windows PowerShell with restricted script execution, use `npm.cmd`.
 
 This is a demo and needs further infrastructure before use with real business inventory.
 
-- Development stores data in `data/inventory-db.json`. Back up this file. File storage supports one local process and does not provide transactional recovery or coordination between server instances.
+- Development stores data in `data/inventory-db.json`. This file is created automatically on first run and ignored by Git. Back it up separately. File storage supports one local process and does not provide transactional recovery or coordination between server instances.
 - Production defaults to memory storage: data disappears on restart and differs between instances. Use `INVENTORY_PERSISTENCE_MODE=file` only on one server with a persistent writable disk. Serverless hosting needs a shared transactional database.
 - Login accepts any warehouse name and issues an unsigned demo cookie. Pages and inventory APIs require the demo cookie, but it does not verify identity or isolate warehouses. Replace demo sessions with real authentication and authorization before public use.
 - Request logs are temporary process memory. Proxy and handlers may run separately; use a shared logging service for a reliable audit trail.

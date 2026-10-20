@@ -179,7 +179,7 @@ export function StockMovementForm({
         type="submit"
         disabled={isSubmitting || !canSubmit}
         className={cn(
-          "w-full btn-glass btn-glassPrimary py-2 rounded font-medium transition-all text-white",
+          "w-full btn-glass btn-glassPrimary py-2 rounded font-medium transition-all",
           isSubmitting && "opacity-60 cursor-not-allowed",
         )}
       >

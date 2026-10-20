@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Alternate Next.js build output
 /.next-vercel/
+
+# Local runtime inventory (created automatically on first run)
+/data/inventory-db.json
