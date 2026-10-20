@@ -7,6 +7,7 @@ import {
 import { StockMovement, StockMovementType } from "@/types/inventory";
 import { updateProduct } from "./productSlice";
 import { deleteProduct } from "./productSlice";
+import type { RootState } from "./index";
 
 /**
  * API Response types
@@ -87,7 +88,7 @@ export const recordMovement = createAsyncThunk<
   }
 >(
   "movements/recordMovement",
-  async (movementData, { rejectWithValue, dispatch }) => {
+  async (movementData, { rejectWithValue, dispatch, getState }) => {
   try {
     const response = await fetch("/api/movements", {
       method: "POST",
@@ -101,15 +102,30 @@ export const recordMovement = createAsyncThunk<
 
     const json: MovementResponse = await response.json();
 
-    // Keep product quantity/updatedAt in sync without full refetch.
-    const productRes = await fetch(`/api/products/${movementData.productId}`, {
-      cache: "no-store",
-    });
-    if (productRes.ok) {
-      const productJson = await productRes.json();
-      if (productJson?.data) {
-        dispatch(updateProduct(productJson.data));
+    // The movement is already saved. Apply its confirmed stock level immediately.
+    const productState = (getState() as RootState).products;
+    const cachedProduct = productState.products.find((p) => p.id === movementData.productId)
+      ?? (productState.selectedProduct?.id === movementData.productId
+        ? productState.selectedProduct : null);
+    if (cachedProduct) {
+      dispatch(updateProduct({
+        ...cachedProduct,
+        quantity: json.data.newQuantity,
+        updatedAt: json.data.performedAt,
+      }));
+    }
+    try {
+      const productRes = await fetch(`/api/products/${movementData.productId}`, {
+        cache: "no-store",
+      });
+      if (productRes.ok) {
+        const productJson = await productRes.json();
+        if (productJson?.data) {
+          dispatch(updateProduct(productJson.data));
+        }
       }
+    } catch {
+      // A failed refresh must not turn a saved movement into a retryable failure.
     }
 
     return json.data;

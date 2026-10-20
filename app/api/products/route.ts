@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (isActive) {
-      filtered = filtered.filter((p) => p.isActive);
+      filtered = filtered.filter((p) => p.isActive !== false);
     }
 
     // Sort

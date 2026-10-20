@@ -132,15 +132,18 @@ export function useProductForm(initialProduct?: Product) {
             id: initialProduct.id,
             data: formData,
           }),
-        );
+        ).unwrap();
         return true;
       } else {
         // Create new product
-        await dispatch(createProduct(formData));
+        await dispatch(createProduct(formData)).unwrap();
         return true;
       }
     } catch (error) {
-      console.error("Form submission error:", error);
+      const message = error instanceof Error ? error.message
+        : typeof error === "object" && error !== null && "message" in error
+          ? String(error.message) : "Failed to save product";
+      setErrors((previous) => ({ ...previous, submit: message }));
       return false;
     } finally {
       setIsSubmitting(false);

@@ -20,9 +20,14 @@ const requestLogs: RequestLog[] = [];
 
 /**
  * Protected routes that require authentication
- * Public routes are: /, /login, /api/auth/*
+ * Login and authentication endpoints remain public for demo sessions.
  */
 const PROTECTED_ROUTES = ["/dashboard", "/products", "/alerts", "/movements"];
+const PROTECTED_API_ROUTES = ["/api/products", "/api/movements", "/api/admin"];
+
+function matchesRoute(pathname: string, route: string): boolean {
+  return pathname === route || pathname.startsWith(`${route}/`);
+}
 
 function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -45,7 +50,8 @@ function logRequest(log: RequestLog): void {
 }
 
 function isProtectedRoute(pathname: string): boolean {
-  return PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
+  return pathname === "/" ||
+    [...PROTECTED_ROUTES, ...PROTECTED_API_ROUTES].some((route) => matchesRoute(pathname, route));
 }
 
 export function proxy(request: NextRequest) {
@@ -66,8 +72,14 @@ export function proxy(request: NextRequest) {
   logRequest(requestLog);
 
   if (isProtected && !inventoryToken) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 },
+      );
+    }
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect", pathname);
+    loginUrl.searchParams.set("redirect", pathname + request.nextUrl.search);
     return NextResponse.redirect(loginUrl);
   }
 

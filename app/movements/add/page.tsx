@@ -1,6 +1,6 @@
 import { Product } from "@/types/inventory";
 import { StockMovementRecordForm } from "@/components/StockMovementRecordForm";
-import { headers } from "next/headers";
+import { getProducts, initializeDatabase } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -20,17 +20,8 @@ export default async function RecordMovementPage({
   const { productId } = await searchParams;
 
   try {
-    const hdrs = await headers();
-    const host = hdrs.get("host");
-    const proto = process.env.NODE_ENV === "development" ? "http" : "https";
-    const baseUrl = host ? `${proto}://${host}` : "http://localhost:3000";
-
-    const res = await fetch(`${baseUrl}/api/products`, { cache: "no-store" });
-
-    if (res.ok) {
-      const data = await res.json();
-      products = data.data || [];
-    }
+    initializeDatabase();
+    products = getProducts().filter((product) => product.isActive !== false);
   } catch (err) {
     error = err instanceof Error ? err.message : "Failed to fetch products";
   }

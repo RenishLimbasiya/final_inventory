@@ -55,7 +55,7 @@ export interface InventoryFilters {
 export interface InventoryStats {
   totalProducts: number;
   totalValue: number;        // sum of (price * quantity) in cents
-  lowStockCount: number;     // products where quantity <= minStockLevel
+  lowStockCount: number;     // products where 0 < quantity <= minStockLevel
   outOfStockCount: number;   // products where quantity === 0
   byCategory: Record<ProductCategory, number>; // count per category
   topByValue: Product[];     // top 5 products by total value (price * qty)

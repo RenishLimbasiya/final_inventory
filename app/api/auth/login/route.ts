@@ -19,7 +19,22 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const warehouseName = body.warehouseName || "Default Warehouse";
+    if (
+      !body || typeof body !== "object" || Array.isArray(body) ||
+      (body.warehouseName !== undefined && typeof body.warehouseName !== "string")
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Expected a JSON object with a warehouse name string" },
+        { status: 400 },
+      );
+    }
+    const warehouseName = body.warehouseName?.trim() || "Default Warehouse";
+    if (warehouseName.length > 100) {
+      return NextResponse.json(
+        { success: false, error: "Warehouse name must be at most 100 characters" },
+        { status: 400 },
+      );
+    }
 
     // Generate auth token (in production, use proper JWT signing)
     const token = Buffer.from(

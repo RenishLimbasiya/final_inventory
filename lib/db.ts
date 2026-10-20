@@ -9,6 +9,7 @@ import path from "path";
 import { Product, StockMovement, StockMovementType } from "@/types/inventory";
 
 interface DatabaseState {
+  initialized: boolean;
   products: Map<string, Product>;
   movements: Map<string, StockMovement>;
   counters: {
@@ -36,7 +37,13 @@ const persistenceMode =
 /**
  * In-memory cache backed by a JSON file
  */
-const db: DatabaseState = {
+// Next.js can bundle this module separately for pages and route handlers.
+// Share the demo state across those bundles and development reloads.
+const inventoryGlobal = globalThis as typeof globalThis & {
+  warehouseInventoryDatabase?: DatabaseState;
+};
+const db: DatabaseState = inventoryGlobal.warehouseInventoryDatabase ??= {
+  initialized: false,
   products: new Map<string, Product>(),
   movements: new Map<string, StockMovement>(),
   counters: {
@@ -116,20 +123,18 @@ function hydrateDatabase(data: SerializedDatabaseState): void {
   db.counters = data.counters;
 }
 
-let initialized = false;
-
 /**
  * Initialize once, preserving a deliberately emptied inventory.
  */
 export function initializeDatabase() {
-  if (initialized) return;
+  if (db.initialized) return;
   if (persistenceMode === "file" && existsSync(DATA_FILE)) {
     const persisted = JSON.parse(
       readFileSync(DATA_FILE, "utf8"),
     ) as SerializedDatabaseState;
 
     hydrateDatabase(persisted);
-    initialized = true;
+    db.initialized = true;
     return;
   }
 
@@ -143,7 +148,7 @@ export function initializeDatabase() {
     db.counters.movementId = 1;
     saveDatabase();
   }
-  initialized = true;
+  db.initialized = true;
 }
 
 /**

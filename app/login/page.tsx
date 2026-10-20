@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useWarehouse } from "@/context/WarehouseContext";
+import { getSafeRedirect } from "@/lib/navigation";
 
 /**
  * Login Page
@@ -9,6 +11,7 @@ import { cn } from "@/lib/utils";
  * In production, integrate with real authentication provider
  */
 export default function LoginPage() {
+  const { setWarehouseName: updateWarehouseName } = useWarehouse();
   const [warehouseName, setWarehouseName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,20 +36,16 @@ export default function LoginPage() {
 
       const data = await response.json();
 
-      // Store warehouse name in localStorage
       if (data.warehouseName) {
-        localStorage.setItem("warehouse_name", data.warehouseName);
+        updateWarehouseName(data.warehouseName);
       }
 
+      // Redirect to dashboard
       const redirect = new URL(window.location.href).searchParams.get(
         "redirect",
       );
-      const target = new URL(redirect || "/dashboard", window.location.origin);
-      window.location.assign(
-        target.origin === window.location.origin
-          ? target.pathname + target.search + target.hash
-          : "/dashboard",
-      );
+      // Reload with the new cookie so protected server content is refreshed.
+      window.location.assign(getSafeRedirect(redirect, window.location.origin));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to log in");
     } finally {
@@ -101,6 +100,7 @@ export default function LoginPage() {
               <input
                 id="warehouse"
                 type="text"
+                maxLength={100}
                 value={warehouseName}
                 onChange={(e) => setWarehouseName(e.target.value)}
                 placeholder="My Warehouse"
